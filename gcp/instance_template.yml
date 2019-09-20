@@ -1,0 +1,7 @@
+- name: get info on an instance template
+  gcp_compute_instance_template_info:
+    filters:
+    - name = test_object
+    project: test_project
+    auth_kind: serviceaccount
+    service_account_file: "/root/.ssh/id_rsa.pub"

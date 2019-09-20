@@ -1,0 +1,12 @@
+gcp_compute_instance:
+    name: "{{ item }}"
+    machine_type: n1-standard-1
+    ... # any other settings
+    zone: us-central1-a
+    project: "my-project"
+    auth_kind: "service_account_file"
+    service_account_file: "~/my_account.json"
+    state: present
+with_items:
+  - instance-1
+  - instance-2
