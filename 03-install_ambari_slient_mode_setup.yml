@@ -1,0 +1,93 @@
+---
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+   - name: download ambari repo
+     become: yes
+     get_url:
+       url: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.6.1.3/ambari.repo
+       dest: /etc/yum.repos.d/
+       mode: 0755
+
+   - name: Clean YUM
+     command: yum clean all
+
+   - name: Install Ambari Agent
+     yum:
+       pkg: ambari-agent
+       state: installed
+
+   - name: Ambari replace configuration File Modification
+     replace:
+      path: /etc/ambari-agent/conf/ambari-agent.ini
+      #regexp: "^hostname=localhost"
+      #replace: "hostname={{ inventory_hostname }}"
+      regexp: "hostname=localhost"
+      replace: "hostname=sev01.asia-east1-b.c.xenon-broker-231307.internal"
+      backup: yes
+
+   - name: Ambari Agent Configuration File Modification
+     blockinfile:
+       path: /etc/ambari-agent/conf/ambari-agent.ini
+       insertafter: "security"
+       content: |
+          force_https_protocol=PROTOCOL_TLSv1_2
+       backup: yes
+
+   - name: Python Configuration File Modification
+     replace:
+      path: /etc/python/cert-verification.cfg
+      regexp: 'verify=platform_default'
+      replace: 'verify=disable'
+      backup: yes
+
+#   - name: Ensure ambari-agent is running
+#     service: name=ambari-agent state=started enabled=yes
+
+- hosts: master
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks: 
+   - name: Install Tools
+     yum:
+       state: present
+       name:
+        - ambari-server
+        - postgresql-jdbc
+
+   - name: Ensure the permission to mysql-java connector
+     file: dest=/usr/share/java/postgresql-jdbc.jar  owner=root group=root mode=0775   
+
+   - name: Configure Ambari server
+     command: ambari-server setup -s
+
+   - lineinfile:
+       path: /var/lib/pgsql/data/pg_hba.conf
+       state: present
+       #regexp: '^#host'
+       #insertafter: '^#host'
+       line: 'host all all 0.0.0.0/0 md5'
+   
+   - name: Obtain the JDBC driver for the database, and as root, set up the driver
+     command: 'ambari-server setup --jdbc-db=postgres --jdbc-driver=/usr/share/java/postgresql-jdbc.jar'
+
+   - name: Start Ambari server
+     #command: 'sleep 60 && ambari-server start'
+     service: name=ambari-server state=started enabled=yes
+ 
+   - name: Ensure postgresql is running
+     service: name=postgresql state=reloaded enabled=yes    
+
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+   - name: Ensure ambari-agent is running
+     service: name=ambari-agent state=started enabled=yes

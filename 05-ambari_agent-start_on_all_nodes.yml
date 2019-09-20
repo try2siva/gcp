@@ -1,0 +1,36 @@
+---
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+
+  - name: Ambari Agent Configuration File Modification
+    blockinfile:
+       path: /etc/ambari-agent/conf/ambari-agent.ini
+       insertafter: "security"
+       content: |
+          force_https_protocol=PROTOCOL_TLSv1_2
+       backup: yes
+
+  - name: Ambari replace configuration File Modification
+    replace:
+      path: /etc/ambari-agent/conf/ambari-agent.ini
+      regexp: "^hostname=localhost"
+      replace: "hostname={{ inventory_hostname }}"
+      backup: yes    
+
+  - name: Python Configuration File Modification
+    replace:
+      path: /etc/python/cert-verification.cfg
+      regexp: 'verify=platform_default'
+      replace: 'verify=disable'
+      backup: yes
+ 
+  - name: Ensure ambari-agent is running
+    service: name=ambari-agent state=started enabled=yes
+
+ 
+
+     

@@ -1,0 +1,10 @@
+[all]
+sev01
+sev02
+sev03
+[master]
+sev01
+[slave]
+sev02
+sev03
+

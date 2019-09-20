@@ -1,0 +1,12 @@
+---
+- hosts: master
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+   - name: copy the script
+     copy : src=/home/ansible/script/hive.sh dest=/tmp/ mode=0755
+   - name: Execute the script
+     command : sh -x /tmp/hive.sh
+

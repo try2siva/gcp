@@ -1,0 +1,23 @@
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Install Tools
+      yum:
+       state: present
+       name:
+        - man
+        - gcc
+        - telnet
+        - elinks
+        - curl
+        - rsync
+        - wget
+        - openssh-clients
+        - unzip
+        - tar
+        - wget
+        - python-devel
+        - openssl

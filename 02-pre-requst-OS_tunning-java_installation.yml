@@ -1,0 +1,74 @@
+---
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Stop iptables
+      command: systemctl stop firewalld
+    - name: disabled auto start iptables
+      command: systemctl disable firewalld
+
+#    - name: If needed temporaly disable SELinux
+#      shell: echo 0 > enforce
+#      args:
+#        chdir: /selinux
+#        removes: enforce
+
+    - name: Disable SElinux permanetly
+      lineinfile: dest=/etc/selinux/config state=present create=no regexp='SELINUX=.*' line='SELINUX=disabled'
+
+    - name: Create hostname entry to {{ ownhostname }}
+      lineinfile: dest=/etc/hostname state=present create=yes regexp='.*' line='{{ inventory_hostname }}'
+    - name: Set networking yes
+      lineinfile: dest=/etc/sysconfig/network create=yes state=present regexp='NETWORKING=.*' line='NETWORKING=yes'
+    - name: Set hostname to {{ ownhostname }} 
+      lineinfile: dest=/etc/sysconfig/network create=yes state=present regexp='HOSTNAME=.*' line="HOSTNAME={{ inventory_hostname }}"
+
+    - name: Remove chrony
+      yum:
+        pkg: chrony
+        state: removed
+
+    - name: Install NTP
+      yum:
+        pkg: ntp
+        state: installed
+    
+    - name: Auto start NTP enabled
+      command: systemctl enable ntpd
+    - name: Start NTP servcie
+      command: systemctl start ntpd
+
+    - name : copy the script
+      copy: src=/home/ansible/playbook/prereqs.sh dest=/tmp/ mode=0755
+    - name: Execute the script
+      command: sh -x /tmp/prereqs.sh
+
+
+    - name : copy the script
+      copy: src=/home/ansible/script/ulimit.sh dest=/tmp/ mode=0755
+    - name: Execute the script
+      command: sh -x /tmp/ulimit.sh 
+
+    - name : copy the java package
+      copy: src=/home/ansible/sw/jdk-8u161-linux-x64.rpm dest=/tmp mode=0755
+    - name: Install RPM from local
+      command: rpm -ivh /tmp/jdk-8u161-linux-x64.rpm
+    
+
+    - name: Set JAVA_HOME
+      lineinfile:
+       dest: /root/.bashrc
+       state: present
+       regexp: '^JAVA_HOME'
+       line: 'export JAVA_HOME=/usr/java/jdk1.8.0_161'
+    - name: Source the bashrc file
+      shell: source /root/.bashrc
+    
+    - name: java path export
+      shell: echo 'export PATH=$JAVA_HOME/bin:$PATH' >> /root/.bashrc
+    - name: Source the bashrc file
+      shell: source /root/.bashrc
+

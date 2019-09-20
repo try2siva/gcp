@@ -1,0 +1,31 @@
+{
+  "blueprint" : "myblueprint",
+  "default_password" : "admin",
+  "host_groups" :[
+    {
+      "name" : "host_group_1",
+      "hosts" : [
+        {
+          "fqdn" : "sev01.asia-east1-b.c.xenon-broker-231307.internal"
+        }
+      ]
+    },
+    {
+      "name" : "host_group_2",
+      "hosts" : [
+        {
+         "fqdn" : "sev02.asia-east1-b.c.xenon-broker-231307.internal"
+        }
+      ]
+    },
+    {
+      "name" : "host_group_3",
+      "hosts" : [
+        {
+         "fqdn" : "sev03.asia-east1-b.c.xenon-broker-231307.internal"
+        }
+      ]
+    }
+  ]
+}
+

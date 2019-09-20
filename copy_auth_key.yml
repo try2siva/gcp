@@ -1,0 +1,10 @@
+---
+- hosts: gcp
+  gather_facts: false
+  vars:
+    ssh_key: '/root/.ssh/authorized_keys'
+  tasks:
+    - name: copy ssh key
+      authorized_key:
+        key: "{{ lookup('file', ssh_key) }}"
+        user: root

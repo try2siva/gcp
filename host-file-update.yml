@@ -1,0 +1,13 @@
+---
+- hosts: all
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: copy the script
+      copy: src=/etc/hosts dest=/tmp mode=0644
+#      rsync_opts:
+#        - "--exclude='Google'"
+
+

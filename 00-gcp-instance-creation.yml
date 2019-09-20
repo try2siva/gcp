@@ -1,0 +1,11 @@
+---
+- hosts: localhost
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+   - name: Execute the script
+     command : sh -x /home/ansible/script/gcp_sev01_sev02_sev03.sh
+
+

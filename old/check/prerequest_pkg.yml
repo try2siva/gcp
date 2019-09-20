@@ -1,0 +1,20 @@
+---
+- hosts: master
+  remote_user: root
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Install common software requirements
+      become: true
+      yum:
+      state: present
+      name:
+        - scp
+        - curl
+        - unzip
+        - tar
+        - wget
+        - gcc*
+        - python-devel*
+
